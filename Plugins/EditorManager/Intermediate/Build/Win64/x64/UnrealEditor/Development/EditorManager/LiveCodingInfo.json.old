@@ -1,8 +1,0 @@
-{
-	"RemapUnityFiles": 
-	{
-		"Module.EditorManager.cpp.obj": [
-			"EditorManager.cpp.obj"
-		]
-	}
-}
