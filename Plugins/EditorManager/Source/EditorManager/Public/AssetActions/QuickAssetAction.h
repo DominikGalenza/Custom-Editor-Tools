@@ -17,5 +17,8 @@ class EDITORMANAGER_API UQuickAssetAction : public UAssetActionUtility
 public:
 	UFUNCTION(CallInEditor)
 	void TestFunction();
+
+	UFUNCTION(CallInEditor)
+	void DuplicateAssets(int32 NumberOfDuplicates);
 	
 };
