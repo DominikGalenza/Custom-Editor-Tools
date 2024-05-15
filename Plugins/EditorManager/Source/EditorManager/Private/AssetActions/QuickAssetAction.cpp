@@ -72,6 +72,18 @@ void UQuickAssetAction::AddPrefixes()
 			continue;
 		}
 
+		//if (OldName.StartsWith(TEXT("M_")))
+		if (SelectedObject->IsA<UMaterialInstanceConstant>())
+		{
+			OldName.RemoveFromStart(TEXT("M_"));
+			OldName.RemoveFromEnd(TEXT("_Inst"));
+		}
+
+		//if (OldName.EndsWith(TEXT("_inst")))
+		//{
+		//	OldName.RemoveFromEnd(TEXT("_inst"));
+		//}
+
 		const FString NewNameWithPrefix = *PrefixFound + OldName;
 		UEditorUtilityLibrary::RenameAsset(SelectedObject, NewNameWithPrefix);
 		++Counter;
