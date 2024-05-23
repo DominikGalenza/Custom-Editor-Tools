@@ -12,4 +12,17 @@ public:
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
+
+private:
+#pragma region ContentBrowserMenuExtention
+	void InitializeContentBrowserMenuExtention();
+
+	TArray<FString> FolderPathsSelected;
+
+	TSharedRef<FExtender> CustomContentBrowserMenuExtender(const TArray<FString>& SelectedPaths);
+
+	void AddContentBrowserMenuEntry(class FMenuBuilder& MenuBuilder);
+
+	void OnDeleteUnusedAssetButtonClicked();
+#pragma endregion
 };
