@@ -24,5 +24,7 @@ private:
 	void AddContentBrowserMenuEntry(class FMenuBuilder& MenuBuilder);
 
 	void OnDeleteUnusedAssetButtonClicked();
+
+	void FixUpRedirectors();
 #pragma endregion
 };
