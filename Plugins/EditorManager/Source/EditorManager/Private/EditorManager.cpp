@@ -8,12 +8,15 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetViewUtils.h"
 #include "AssetToolsModule.h"
+#include "SlateWidgets/AdvanceDeletionWidget.h"
 
 #define LOCTEXT_NAMESPACE "FEditorManagerModule"
 
 void FEditorManagerModule::StartupModule()
 {
 	InitializeContentBrowserMenuExtention();
+
+	RegisterAdvanceDeletionTab();
 }
 
 void FEditorManagerModule::ShutdownModule()
@@ -67,6 +70,11 @@ void FEditorManagerModule::AddContentBrowserMenuEntry(FMenuBuilder& MenuBuilder)
 		FText::FromString(TEXT("Safely delete all empty folders")),
 		FSlateIcon(),
 		FExecuteAction::CreateRaw(this, &FEditorManagerModule::OnDeleteEmptyFoldersButtonClicked));
+
+	MenuBuilder.AddMenuEntry(FText::FromString(TEXT("Advance Deletion")),
+		FText::FromString(TEXT("List assets by specific condition in a tab for deleting")),
+		FSlateIcon(),
+		FExecuteAction::CreateRaw(this, &FEditorManagerModule::OnAdvanceDeletionButtonClicked));
 }
 
 void FEditorManagerModule::OnDeleteUnusedAssetButtonClicked()
@@ -194,6 +202,11 @@ void FEditorManagerModule::OnDeleteEmptyFoldersButtonClicked()
 	}
 }
 
+void FEditorManagerModule::OnAdvanceDeletionButtonClicked()
+{
+	FGlobalTabmanager::Get()->TryInvokeTab(FName("AdvanceDeletion"));
+}
+
 void FEditorManagerModule::FixUpRedirectors()
 {
 	IAssetRegistry& AssetRegistry =
@@ -234,6 +247,23 @@ void FEditorManagerModule::FixUpRedirectors()
 		FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
 		AssetToolsModule.Get().FixupReferencers(Redirectors);
 	}
+}
+#pragma endregion
+
+#pragma region CustomEditorTab
+void FEditorManagerModule::RegisterAdvanceDeletionTab()
+{
+	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(FName("AdvanceDeletion"),
+		FOnSpawnTab::CreateRaw(this, &FEditorManagerModule::OnSpawnAdvanceDeletionTab))
+		.SetDisplayName(FText::FromString(TEXT("Advance Deletion")));
+}
+TSharedRef<SDockTab> FEditorManagerModule::OnSpawnAdvanceDeletionTab(const FSpawnTabArgs& SpawnTabArgs)
+{
+	return SNew(SDockTab).TabRole(ETabRole::NomadTab)
+	[
+		SNew(SAdvanceDeletionTab)
+			.TestString(TEXT("I am passing data"))
+	];
 }
 #pragma endregion
 

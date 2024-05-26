@@ -24,9 +24,15 @@ private:
 	void AddContentBrowserMenuEntry(class FMenuBuilder& MenuBuilder);
 
 	void OnDeleteUnusedAssetButtonClicked();
-
 	void OnDeleteEmptyFoldersButtonClicked();
+	void OnAdvanceDeletionButtonClicked();
 
 	void FixUpRedirectors();
+#pragma endregion
+
+#pragma region CustomEditorTab
+	void RegisterAdvanceDeletionTab();
+
+	TSharedRef<SDockTab> OnSpawnAdvanceDeletionTab(const FSpawnTabArgs& SpawnTabArgs);
 #pragma endregion
 };
