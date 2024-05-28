@@ -50,9 +50,9 @@ TSharedRef<FExtender> FEditorManagerModule::CustomContentBrowserMenuExtender(con
 	if (SelectedPaths.Num() > 0)
 	{
 		MenuExtender->AddMenuExtension(FName("Delete"),
-			EExtensionHook::After,
-			TSharedPtr<FUICommandList>(),
-			FMenuExtensionDelegate::CreateRaw(this, &FEditorManagerModule::AddContentBrowserMenuEntry));
+		EExtensionHook::After,
+		TSharedPtr<FUICommandList>(),
+		FMenuExtensionDelegate::CreateRaw(this, &FEditorManagerModule::AddContentBrowserMenuEntry));
 
 		FolderPathsSelected = SelectedPaths;
 	}
@@ -62,19 +62,19 @@ TSharedRef<FExtender> FEditorManagerModule::CustomContentBrowserMenuExtender(con
 void FEditorManagerModule::AddContentBrowserMenuEntry(FMenuBuilder& MenuBuilder)
 {
 	MenuBuilder.AddMenuEntry(FText::FromString(TEXT("Delete Unused Assets")),
-		FText::FromString(TEXT("Safely delete all unused assets under folder")),
-		FSlateIcon(),
-		FExecuteAction::CreateRaw(this, &FEditorManagerModule::OnDeleteUnusedAssetButtonClicked));
+	FText::FromString(TEXT("Safely delete all unused assets under folder")),
+	FSlateIcon(),
+	FExecuteAction::CreateRaw(this, &FEditorManagerModule::OnDeleteUnusedAssetButtonClicked));
 
 	MenuBuilder.AddMenuEntry(FText::FromString(TEXT("Delete Empty Folders")),
-		FText::FromString(TEXT("Safely delete all empty folders")),
-		FSlateIcon(),
-		FExecuteAction::CreateRaw(this, &FEditorManagerModule::OnDeleteEmptyFoldersButtonClicked));
+	FText::FromString(TEXT("Safely delete all empty folders")),
+	FSlateIcon(),
+	FExecuteAction::CreateRaw(this, &FEditorManagerModule::OnDeleteEmptyFoldersButtonClicked));
 
 	MenuBuilder.AddMenuEntry(FText::FromString(TEXT("Advance Deletion")),
-		FText::FromString(TEXT("List assets by specific condition in a tab for deleting")),
-		FSlateIcon(),
-		FExecuteAction::CreateRaw(this, &FEditorManagerModule::OnAdvanceDeletionButtonClicked));
+	FText::FromString(TEXT("List assets by specific condition in a tab for deleting")),
+	FSlateIcon(),
+	FExecuteAction::CreateRaw(this, &FEditorManagerModule::OnAdvanceDeletionButtonClicked));
 }
 
 void FEditorManagerModule::OnDeleteUnusedAssetButtonClicked()
@@ -95,7 +95,7 @@ void FEditorManagerModule::OnDeleteUnusedAssetButtonClicked()
 
 	EAppReturnType::Type ConfirmResult =
 	DebugHeader::ShowMessageDialog(EAppMsgType::YesNo, TEXT("A total of ") + FString::FromInt(AssetsPathNames.Num()) 
-		+ TEXT(" assets needs to be checked.\nWould you like to proceed?"), false);
+	+ TEXT(" assets needs to be checked.\nWould you like to proceed?"), false);
 
 	if (ConfirmResult == EAppReturnType::No)
 	{
@@ -177,7 +177,7 @@ void FEditorManagerModule::OnDeleteEmptyFoldersButtonClicked()
 	}
 
 	EAppReturnType::Type ConfirmResult = DebugHeader::ShowMessageDialog(EAppMsgType::OkCancel,
-		TEXT("Empty folders found in:\n") + EmptyFolderPathsNames + TEXT("\nWould you like to delete all?"), false);
+	TEXT("Empty folders found in:\n") + EmptyFolderPathsNames + TEXT("\nWould you like to delete all?"), false);
 
 	if (ConfirmResult == EAppReturnType::Cancel)
 	{
@@ -254,16 +254,43 @@ void FEditorManagerModule::FixUpRedirectors()
 void FEditorManagerModule::RegisterAdvanceDeletionTab()
 {
 	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(FName("AdvanceDeletion"),
-		FOnSpawnTab::CreateRaw(this, &FEditorManagerModule::OnSpawnAdvanceDeletionTab))
-		.SetDisplayName(FText::FromString(TEXT("Advance Deletion")));
+	FOnSpawnTab::CreateRaw(this, &FEditorManagerModule::OnSpawnAdvanceDeletionTab))
+	.SetDisplayName(FText::FromString(TEXT("Advance Deletion")));
 }
+
 TSharedRef<SDockTab> FEditorManagerModule::OnSpawnAdvanceDeletionTab(const FSpawnTabArgs& SpawnTabArgs)
 {
 	return SNew(SDockTab).TabRole(ETabRole::NomadTab)
 	[
-		SNew(SAdvanceDeletionTab)
-			.TestString(TEXT("I am passing data"))
+		SNew(SAdvanceDeletionTab).AssetsDataToStore(GetAllAssetDataUnderSelectedFolder())
 	];
+}
+
+TArray<TSharedPtr<FAssetData>> FEditorManagerModule::GetAllAssetDataUnderSelectedFolder()
+{
+	TArray<TSharedPtr<FAssetData>> AvailableAssetsData;
+
+	TArray<FString> AssetsPathNames = UEditorAssetLibrary::ListAssets(FolderPathsSelected[0]);
+
+	for (const FString& AssetPathName : AssetsPathNames)
+	{
+		if (AssetPathName.Contains(TEXT("Developers")) || AssetPathName.Contains(TEXT("Collections"))
+			|| AssetPathName.Contains(TEXT("__ExternalActors__")) || AssetPathName.Contains(TEXT("__ExternalObjects__")))
+		{
+			continue;
+		}
+
+		if (!UEditorAssetLibrary::DoesAssetExist(AssetPathName))
+		{
+			continue;
+		}
+
+		const FAssetData Data = UEditorAssetLibrary::FindAssetData(AssetPathName);
+
+		AvailableAssetsData.Add(MakeShared<FAssetData>(Data));
+	}
+
+	return AvailableAssetsData;
 }
 #pragma endregion
 
