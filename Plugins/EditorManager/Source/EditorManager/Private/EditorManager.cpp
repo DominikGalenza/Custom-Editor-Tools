@@ -294,6 +294,21 @@ TArray<TSharedPtr<FAssetData>> FEditorManagerModule::GetAllAssetDataUnderSelecte
 }
 #pragma endregion
 
+#pragma region ProcessDataForAdvanceDeletionTab
+bool FEditorManagerModule::DeleteSingleAssetForAssetList(const FAssetData& AssetDataToDelete)
+{
+	TArray<FAssetData> AssetDatasToDelete;
+	AssetDatasToDelete.Add(AssetDataToDelete);
+
+	if (ObjectTools::DeleteAssets(AssetDatasToDelete) > 0)
+	{
+		return true;
+	}
+	
+	return false;
+}
+#pragma endregion
+
 #undef LOCTEXT_NAMESPACE
 	
 IMPLEMENT_MODULE(FEditorManagerModule, EditorManager)
